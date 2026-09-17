@@ -205,6 +205,25 @@
     animation-delay: var(--d, 0ms);
   }
 
+  /* ---- Logo marquee ----------------------------------------------------
+     One row at any width and any number of logos. The track holds two copies
+     of the list, so translating it exactly half way loops seamlessly. */
+  .marquee {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 4rem, #000 calc(100% - 4rem), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 4rem, #000 calc(100% - 4rem), transparent);
+  }
+
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: marquee 60s linear infinite;
+  }
+
+  .marquee:hover .marquee-track,
+  .marquee:focus-within .marquee-track {
+    animation-play-state: paused;
+  }
+
   /* ---- Scroll progress -------------------------------------------------
      Scroll-driven CSS: no JS, no scroll listener, no re-render. Browsers
      without support simply never show the bar. */
@@ -284,6 +303,12 @@
   }
 }
 
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
 /* Everything above degrades to an instant state change. Declared last so it
    wins, and covers the SVG and scroll-driven animations too. */
 @media (prefers-reduced-motion: reduce) {
@@ -302,6 +327,19 @@
   .packet,
   .scroll-progress {
     display: none;
+  }
+
+  /* The marquee becomes an ordinary wrapped row rather than freezing mid-scroll
+     with half its logos clipped off the edge. */
+  .marquee-track {
+    animation: none;
+    width: auto;
+    flex-wrap: wrap;
+  }
+
+  .marquee {
+    -webkit-mask-image: none;
+    mask-image: none;
   }
 
   .lift:hover,

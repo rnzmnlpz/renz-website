@@ -1,49 +1,72 @@
-import { logos } from "@/lib/logos";
+import { logos, type Logo } from "@/lib/logos";
 
 function aspectOf(viewBox: string) {
   const [, , w, h] = viewBox.split(" ").map(Number);
   return w / h;
 }
 
-/* Monochrome at rest so six vendor palettes do not fight the page; each
-   resolves to its own brand colour on hover. */
+function Mark({ logo }: { logo: Logo }) {
+  const shared =
+    "transition-colors duration-[var(--t-hover)] group-hover/logo:text-[var(--brand)]";
+
+  return (
+    <span
+      className="group/logo flex shrink-0 items-center text-faint"
+      style={{ "--brand": logo.brand } as React.CSSProperties}
+    >
+      {logo.path ? (
+        <svg
+          viewBox={logo.viewBox}
+          /* Width follows the tightened viewBox so each mark keeps its own
+             proportions and reserves exactly the space it occupies. */
+          height={logo.height}
+          width={Math.round(logo.height * aspectOf(logo.viewBox))}
+          className={`fill-current ${shared}`}
+          aria-hidden
+        >
+          <path d={logo.path} />
+        </svg>
+      ) : (
+        <span
+          translate="no"
+          aria-hidden
+          style={{ fontSize: logo.height * 0.66, lineHeight: 1 }}
+          className={`font-semibold tracking-[-0.02em] ${shared}`}
+        >
+          {logo.title}
+        </span>
+      )}
+    </span>
+  );
+}
+
+/* Monochrome at rest so fourteen vendor palettes do not fight the page; each
+   resolves to its own brand colour on hover, which also pauses the scroll. */
 export default function LogoStrip() {
   return (
-    <ul className="flex flex-wrap items-center gap-x-9 gap-y-6 sm:gap-x-11">
-      {logos.map((logo, i) => (
-        <li
-          key={logo.id}
-          className="rise group flex items-center text-faint"
-          style={{ "--d": `${i * 60}ms`, "--brand": logo.brand } as React.CSSProperties}
-        >
-          <span className="sr-only">
-            {logo.title} — {logo.note}
-          </span>
+    <div className="marquee rise -mx-6 overflow-hidden sm:-mx-8">
+      <div className="marquee-track">
+        {/* The list is rendered twice so the loop has something to scroll into.
+            Only the first copy is exposed to assistive tech. */}
+        <ul className="flex shrink-0 items-center gap-x-10 px-5 sm:gap-x-12">
+          {logos.map((logo) => (
+            <li key={logo.id}>
+              <span className="sr-only">
+                {logo.title} — {logo.note}
+              </span>
+              <Mark logo={logo} />
+            </li>
+          ))}
+        </ul>
 
-          {logo.path ? (
-            <svg
-              viewBox={logo.viewBox}
-              /* Width follows the tightened viewBox so each mark keeps its own
-                 proportions and reserves exactly the space it occupies. */
-              height={logo.height}
-              width={Math.round(logo.height * aspectOf(logo.viewBox))}
-              className="fill-current transition-colors duration-[var(--t-hover)] group-hover:text-[var(--brand)]"
-              aria-hidden
-            >
-              <path d={logo.path} />
-            </svg>
-          ) : (
-            <span
-              translate="no"
-              aria-hidden
-              style={{ fontSize: logo.height * 0.66, lineHeight: 1 }}
-              className="font-semibold tracking-[-0.02em] transition-colors duration-[var(--t-hover)] group-hover:text-[var(--brand)]"
-            >
-              {logo.title}
-            </span>
-          )}
-        </li>
-      ))}
-    </ul>
+        <ul className="flex shrink-0 items-center gap-x-10 px-5 sm:gap-x-12" aria-hidden>
+          {logos.map((logo) => (
+            <li key={`${logo.id}-loop`}>
+              <Mark logo={logo} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
   );
 }
