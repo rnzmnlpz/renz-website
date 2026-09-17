@@ -38,7 +38,7 @@ export default function Credentials() {
                 <p className="mt-2 font-medium text-signal">{e.degree}</p>
                 <p className="mt-0.5 text-sm text-dim">{e.detail}</p>
                 <p className="mt-2 text-sm text-dim">{e.school}</p>
-                <p className="mt-2 text-sm italic leading-relaxed text-dim/80">{e.note}</p>
+                <p className="mt-2 text-sm italic leading-relaxed text-dim">{e.note}</p>
               </li>
             ))}
           </ul>
