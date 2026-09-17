@@ -10,20 +10,33 @@ const SEVERITY: Record<Severity, { label: string; color: string; glyph: string }
   healthy: { label: "Resolved", color: "#3fd0c9", glyph: "●" },
 };
 
-type Event = { t: string; severity: Severity; source: string; message: string };
+type Event = { id: number; at: number; severity: Severity; source: string; message: string };
 
-/* Pre-baked so the server and client render identical markup on first paint. */
-const INITIAL: Event[] = [
-  { t: "09:42:18", severity: "critical", source: "FortiGate", message: "Brute force on SSL VPN — 214 attempts from one ASN, source blocked" },
-  { t: "09:41:02", severity: "warning", source: "Carbon Black", message: "Unsigned binary executed on FIN-WS-14, quarantined for review" },
-  { t: "09:38:55", severity: "healthy", source: "Intune", message: "FIN-WS-09 returned to compliant after disk encryption completed" },
-  { t: "09:36:11", severity: "warning", source: "Entra ID", message: "Impossible travel flagged for a finance account, MFA re-challenged" },
-  { t: "09:33:47", severity: "healthy", source: "Core switch", message: "Uplink Gi1/0/49 recovered, LACP bundle back to 20G" },
+/* The feed runs on its own simulated clock so timestamps stay monotonic and
+   the server and client render identical markup. */
+const START = 9 * 3600 + 42 * 60 + 18;
+const GAP = 37;
+
+function clock(seconds: number) {
+  const s = seconds % 86400;
+  return [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60]
+    .map((n) => String(n).padStart(2, "0"))
+    .join(":");
+}
+
+const SEED: Pick<Event, "severity" | "source" | "message">[] = [
+  { severity: "critical", source: "FortiGate", message: "Brute force on SSL VPN, 214 attempts from one ASN, source blocked" },
+  { severity: "warning", source: "Carbon Black", message: "Unsigned binary executed on FIN-WS-14, quarantined for review" },
+  { severity: "healthy", source: "Intune", message: "FIN-WS-09 returned to compliant after disk encryption completed" },
+  { severity: "warning", source: "Entra ID", message: "Impossible travel flagged for a finance account, MFA re-challenged" },
+  { severity: "healthy", source: "Core switch", message: "Uplink Gi1/0/49 recovered, LACP bundle back to 20G" },
 ];
 
-const POOL: Omit<Event, "t">[] = [
+const INITIAL: Event[] = SEED.map((e, i) => ({ ...e, id: -i, at: START - i * GAP }));
+
+const POOL: Pick<Event, "severity" | "source" | "message">[] = [
   { severity: "warning", source: "FortiGate", message: "Outbound connection to a newly registered domain blocked by web filter" },
-  { severity: "healthy", source: "Intune", message: "Device compliance sweep finished — 3 endpoints remediated automatically" },
+  { severity: "healthy", source: "Intune", message: "Device compliance sweep finished, 3 endpoints remediated automatically" },
   { severity: "critical", source: "Carbon Black", message: "Credential dumping behaviour detected on a workstation, host isolated" },
   { severity: "warning", source: "Meraki", message: "Rogue SSID broadcasting the corporate name near the ground floor" },
   { severity: "healthy", source: "Azure", message: "Site-to-site tunnel renegotiated cleanly after scheduled key rotation" },
@@ -53,90 +66,85 @@ const RULES = [
   { rule: "deny-smb-egress", hits: 97 },
 ];
 
-const TOTAL_ENDPOINTS = COMPLIANCE.reduce((sum, s) => sum + s.value, 0);
+const TOTAL = COMPLIANCE.reduce((sum, s) => sum + s.value, 0);
 const MAX_HITS = Math.max(...RULES.map((r) => r.hits));
 
 export default function SocDashboard() {
   const [events, setEvents] = useState<Event[]>(INITIAL);
+  const [running, setRunning] = useState(true);
   const cursor = useRef(0);
 
   useEffect(() => {
+    if (!running) return;
     const id = setInterval(() => {
-      const next = POOL[cursor.current % POOL.length];
-      cursor.current += 1;
-      const t = new Intl.DateTimeFormat("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: false,
-        timeZone: "Asia/Manila",
-      }).format(new Date());
-      setEvents((prev) => [{ ...next, t }, ...prev].slice(0, 7));
+      setEvents((prev) => {
+        const next = POOL[cursor.current % POOL.length];
+        cursor.current += 1;
+        const event: Event = { ...next, id: cursor.current, at: prev[0].at + GAP };
+        return [event, ...prev].slice(0, 7);
+      });
     }, 4200);
     return () => clearInterval(id);
-  }, []);
+  }, [running]);
 
   return (
     <div>
-      <p className="mb-6 inline-flex items-center gap-2 rounded-sm border border-amber/30 bg-amber/5 px-3 py-1.5 font-mono text-xs text-amber">
-        Simulated data — a working model of the consoles I run, not a live feed
-      </p>
+      <p className="font-mono text-xs text-amber">Simulated data, not a live feed</p>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid gap-x-12 gap-y-8 sm:grid-cols-2 lg:grid-cols-4">
         {KPIS.map((kpi) => (
-          <div key={kpi.label} className="rounded-md border border-line bg-panel p-5">
-            <p className="font-mono text-xs text-dim">{kpi.label}</p>
-            <p className="mt-3 text-3xl font-semibold tabular-nums tracking-tight text-signal">{kpi.value}</p>
-            <p className="mt-1 font-mono text-[0.68rem] text-dim">{kpi.note}</p>
+          <div key={kpi.label} className="border-t border-line pt-5">
+            <p className="font-mono text-xs text-faint">{kpi.label}</p>
+            <p className="mt-3 text-4xl font-medium tabular-nums tracking-tight text-signal">{kpi.value}</p>
+            <p className="mt-1 font-mono text-xs text-faint">{kpi.note}</p>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-md border border-line bg-panel p-5 sm:p-6">
-          <h4 className="font-mono text-sm text-signal">Endpoint compliance</h4>
-          <p className="mt-1 font-mono text-xs text-dim">{TOTAL_ENDPOINTS} enrolled devices</p>
+      <div className="mt-16 grid gap-x-16 gap-y-12 lg:grid-cols-2">
+        <div className="border-t border-line pt-6">
+          <h4 className="font-mono text-sm text-aqua">Endpoint compliance</h4>
+          <p className="mt-1.5 font-mono text-xs text-faint">{TOTAL} enrolled devices</p>
 
-          <div className="mt-5 flex h-3 w-full gap-0.5 overflow-hidden rounded-sm" role="img" aria-label={COMPLIANCE.map((s) => `${s.label} ${s.value}`).join(", ")}>
+          <div
+            className="mt-6 flex h-2 w-full gap-0.5"
+            role="img"
+            aria-label={COMPLIANCE.map((s) => `${s.label} ${s.value}`).join(", ")}
+          >
             {COMPLIANCE.map((seg) => (
-              <div
-                key={seg.label}
-                style={{ width: `${(seg.value / TOTAL_ENDPOINTS) * 100}%`, background: seg.color }}
-                className="first:rounded-l-sm last:rounded-r-sm"
-              />
+              <div key={seg.label} style={{ width: `${(seg.value / TOTAL) * 100}%`, background: seg.color }} />
             ))}
           </div>
 
-          <ul className="mt-5 space-y-2.5">
+          <ul className="mt-6 space-y-3">
             {COMPLIANCE.map((seg) => (
-              <li key={seg.label} className="flex items-center gap-2.5 text-sm">
-                <span className="h-2 w-2 shrink-0 rounded-[2px]" style={{ background: seg.color }} aria-hidden />
+              <li key={seg.label} className="flex items-center gap-3 text-sm">
+                <span className="h-1.5 w-1.5 shrink-0" style={{ background: seg.color }} aria-hidden />
                 <span className="text-dim">{seg.label}</span>
                 <span className="ml-auto font-mono tabular-nums text-signal">{seg.value}</span>
-                <span className="w-12 text-right font-mono text-xs tabular-nums text-dim">
-                  {((seg.value / TOTAL_ENDPOINTS) * 100).toFixed(1)}%
+                <span className="w-12 text-right font-mono text-xs tabular-nums text-faint">
+                  {((seg.value / TOTAL) * 100).toFixed(1)}%
                 </span>
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="rounded-md border border-line bg-panel p-5 sm:p-6">
-          <h4 className="font-mono text-sm text-signal">Firewall rules by hit count</h4>
-          <p className="mt-1 font-mono text-xs text-dim">last 24 hours</p>
+        <div className="border-t border-line pt-6">
+          <h4 className="font-mono text-sm text-aqua">Firewall rules by hit count</h4>
+          <p className="mt-1.5 font-mono text-xs text-faint">last 24 hours</p>
 
-          <ul className="mt-5 space-y-4">
+          <ul className="mt-6 space-y-5">
             {RULES.map((r) => (
               <li key={r.rule}>
                 <div className="flex items-baseline justify-between gap-3">
                   <span className="font-mono text-xs text-signal">{r.rule}</span>
-                  <span className="font-mono text-xs tabular-nums text-dim">{r.hits.toLocaleString("en-US")}</span>
+                  <span className="font-mono text-xs tabular-nums text-faint">
+                    {r.hits.toLocaleString("en-US")}
+                  </span>
                 </div>
-                <div className="mt-2 h-1.5 w-full rounded-sm bg-rack">
-                  <div
-                    className="h-1.5 rounded-sm bg-aqua"
-                    style={{ width: `${(r.hits / MAX_HITS) * 100}%` }}
-                  />
+                <div className="mt-2 h-1 w-full bg-panel">
+                  <div className="h-1 bg-aqua" style={{ width: `${(r.hits / MAX_HITS) * 100}%` }} />
                 </div>
               </li>
             ))}
@@ -144,27 +152,33 @@ export default function SocDashboard() {
         </div>
       </div>
 
-      <div className="mt-4 rounded-md border border-line bg-panel p-5 sm:p-6">
-        <div className="flex items-center justify-between">
-          <h4 className="font-mono text-sm text-signal">Event feed</h4>
-          <span className="inline-flex items-center gap-2 font-mono text-xs text-dim">
-            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-aqua" aria-hidden />
-            streaming
-          </span>
+      <div className="mt-16 border-t border-line pt-6">
+        <div className="flex items-center justify-between gap-4">
+          <h4 className="font-mono text-sm text-aqua">Event feed</h4>
+          <button
+            type="button"
+            onClick={() => setRunning((v) => !v)}
+            className="min-h-11 border border-control px-4 font-mono text-xs text-dim transition-colors hover:border-aqua hover:text-aqua"
+          >
+            {running ? "Pause feed" : "Resume feed"}
+          </button>
         </div>
 
-        <ul className="mt-5 divide-y divide-line/60" aria-live="polite">
-          {events.map((e, i) => {
+        <ul className="mt-4">
+          {events.map((e) => {
             const s = SEVERITY[e.severity];
             return (
-              <li key={`${e.t}-${i}`} className="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-3 sm:flex-nowrap">
-                <span className="font-mono text-xs tabular-nums text-dim">{e.t}</span>
+              <li
+                key={e.id}
+                className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line py-3.5 last:border-0 sm:flex-nowrap"
+              >
+                <span className="font-mono text-xs tabular-nums text-faint">{clock(e.at)}</span>
                 <span className="inline-flex shrink-0 items-center gap-1.5 font-mono text-xs" style={{ color: s.color }}>
                   <span aria-hidden>{s.glyph}</span>
                   {s.label}
                 </span>
-                <span className="shrink-0 font-mono text-xs text-dim">{e.source}</span>
-                <span className="w-full text-sm leading-relaxed text-signal sm:w-auto sm:flex-1">{e.message}</span>
+                <span className="shrink-0 font-mono text-xs text-faint">{e.source}</span>
+                <span className="w-full text-sm leading-relaxed text-dim sm:w-auto sm:flex-1">{e.message}</span>
               </li>
             );
           })}

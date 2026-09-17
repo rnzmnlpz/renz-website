@@ -9,9 +9,19 @@ export type SubnetResult = {
   lastHost: string;
   totalAddresses: number;
   usableHosts: number;
-  scope: "Private" | "Public" | "Loopback" | "Link-local" | "Multicast" | "Reserved";
+  scope: Scope;
   binaryMask: string;
 };
+
+export type Scope =
+  | "Private"
+  | "Public"
+  | "Loopback"
+  | "Link-local"
+  | "Multicast"
+  | "Reserved"
+  | "Carrier NAT"
+  | "Documentation";
 
 const OCTET = 256;
 
@@ -24,10 +34,12 @@ export function intToIp(value: number): string {
   return [(n >>> 24) & 255, (n >>> 16) & 255, (n >>> 8) & 255, n & 255].join(".");
 }
 
-function classify(network: number): SubnetResult["scope"] {
-  const first = (network >>> 24) & 255;
-  const second = (network >>> 16) & 255;
+function classify(address: number): Scope {
+  const first = (address >>> 24) & 255;
+  const second = (address >>> 16) & 255;
+  const third = (address >>> 8) & 255;
 
+  if (first === 0) return "Reserved";
   if (first === 127) return "Loopback";
   if (first === 169 && second === 254) return "Link-local";
   if (first >= 224 && first <= 239) return "Multicast";
@@ -35,6 +47,11 @@ function classify(network: number): SubnetResult["scope"] {
   if (first === 10) return "Private";
   if (first === 172 && second >= 16 && second <= 31) return "Private";
   if (first === 192 && second === 168) return "Private";
+  if (first === 100 && second >= 64 && second <= 127) return "Carrier NAT";
+  if (first === 198 && (second === 18 || second === 19)) return "Reserved";
+  if (first === 192 && second === 0 && third === 2) return "Documentation";
+  if (first === 198 && second === 51 && third === 100) return "Documentation";
+  if (first === 203 && second === 0 && third === 113) return "Documentation";
   return "Public";
 }
 
@@ -84,7 +101,7 @@ export function parseSubnet(input: string): SubnetResult | null {
     lastHost: intToIp(lastHost),
     totalAddresses,
     usableHosts,
-    scope: classify(network),
+    scope: classify(addressInt),
     binaryMask: toBinary(maskInt),
   };
 }

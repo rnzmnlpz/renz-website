@@ -10,7 +10,7 @@ export const profile = {
   linkedin: "https://www.linkedin.com/in/rjohn-manlapaz",
   github: "https://github.com/rnzmnlpz",
   summary:
-    "I own networks end to end — LAN, WAN, VPN and the firewalls in front of them — across cloud and on-premises infrastructure. I keep them fast, locked down and ready to scale, then document the fixes so the same issue never costs anyone a second outage.",
+    "I look after enterprise networks end to end: LAN, WAN, VPN and the firewalls in front of them, across cloud and on-premises infrastructure. When something breaks I find out why, fix it, and write it down so it doesn't happen twice.",
 } as const;
 
 export type Role = {
@@ -32,7 +32,7 @@ export const roles: Role[] = [
     end: "Present",
     current: true,
     points: [
-      "Own the network end to end — LAN, VPN and firewalls — keeping it fast, locked down and ready to scale across cloud and on-premises tooling.",
+      "Run the network across cloud and on-premises infrastructure, from access switching and VPN through to firewall policy.",
       "Monitor performance and security in real time, resolve slowdowns and dropouts, and document every fix so issues stop repeating.",
       "Keep the applications and operating systems people depend on in sync with the network, so the infrastructure stays invisible to the user.",
       "Handle hardware failure across servers, switches and workstations, including vendors, warranties and the full equipment inventory.",
@@ -92,7 +92,7 @@ export type ToolGroup = {
 export const stack: ToolGroup[] = [
   {
     layer: "Perimeter",
-    caption: "What traffic is allowed to become",
+    caption: "What gets in, and on what terms",
     tools: [
       { name: "Fortinet FortiGate", note: "NGFW policy, VPN termination, NSE 1–2" },
       { name: "Cisco", note: "Network defense, routing and switching" },
@@ -101,7 +101,7 @@ export const stack: ToolGroup[] = [
   },
   {
     layer: "Access & Wireless",
-    caption: "Where people meet the network",
+    caption: "Where users and devices connect",
     tools: [
       { name: "Cisco Meraki", note: "Cloud-managed switching and APs" },
       { name: "Ubiquiti UniFi", note: "Controller, switching, wireless coverage" },
@@ -110,7 +110,7 @@ export const stack: ToolGroup[] = [
   },
   {
     layer: "Endpoint",
-    caption: "The devices that carry the risk",
+    caption: "Managed devices and detection",
     tools: [
       { name: "Microsoft Intune", note: "Policy, compliance, device enrolment" },
       { name: "MDM — SOTI MobiControl", note: "Mobile fleet management" },
@@ -119,7 +119,7 @@ export const stack: ToolGroup[] = [
   },
   {
     layer: "Cloud & Server",
-    caption: "Where the services actually live",
+    caption: "Identity, servers and virtualization",
     tools: [
       { name: "Microsoft Azure", note: "Entra ID, access control, monitoring" },
       { name: "Windows Server", note: "AD DS, DNS, DHCP, file and print" },
@@ -131,7 +131,7 @@ export const stack: ToolGroup[] = [
 export const certifications = [
   { name: "Certified Cybersecurity Educator Professional", code: "CCEP", family: "Cybersecurity" },
   { name: "Certified Red Team Operations Management", code: "CRTOM", family: "Offensive" },
-  { name: "NSE 1 Cybersecurity and Cloud Fundamentals", code: "8674710164RJ", family: "Fortinet" },
+  { name: "NSE 1 Cybersecurity and Cloud Fundamentals", code: "NSE 1", family: "Fortinet" },
   { name: "NSE 2 Introduction to Next Generation Firewall", code: "NSE 2", family: "Fortinet" },
   { name: "Cisco Network Defense", code: "NetDef", family: "Cisco" },
   { name: "Cisco Endpoint Security", code: "EndSec", family: "Cisco" },

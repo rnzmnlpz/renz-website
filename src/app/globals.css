@@ -11,7 +11,12 @@
   --color-amber: #f0a33c;
   --color-alert: #ff5c6c;
   --color-signal: #e6edf3;
-  --color-dim: #6b8299;
+  --color-dim: #8fa5b8;
+  --color-faint: #6b8299;
+
+  /* Borders on interactive controls need 3:1 against the page (WCAG 1.4.11).
+     --color-line is 1.41:1 and is for decorative dividers only. */
+  --color-control: #4a6a85;
 
   --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
@@ -19,7 +24,10 @@
 
 @layer base {
   html {
+    color-scheme: dark;
     scroll-behavior: smooth;
+    /* Keeps the fixed header from covering whatever receives focus. */
+    scroll-padding-top: 5rem;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -28,7 +36,6 @@
     color: var(--color-signal);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
   }
 
   ::selection {
@@ -41,24 +48,67 @@
     outline-offset: 3px;
     border-radius: 2px;
   }
-
-  /* Only suppress the outline where a component draws its own focus ring. */
-  [data-custom-focus]:focus-visible {
-    outline: none;
-  }
 }
 
 @layer utilities {
-  /* Faint rack-unit grid; sits behind content, never above it. */
-  .bg-grid {
-    background-image:
-      linear-gradient(to right, rgba(27, 46, 64, 0.35) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(27, 46, 64, 0.35) 1px, transparent 1px);
-    background-size: 64px 64px;
+  /* Entrance runs as CSS so the hero text paints without waiting for
+     hydration. Driving this from JS put opacity:0 in the prerendered HTML. */
+  .rise {
+    animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: var(--d, 0ms);
   }
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* pathLength="1" normalises every path, so one dash rule draws them all. */
+  .link-draw {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+    animation: draw 0.7s ease-out both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  .packet {
+    offset-distance: 0%;
+    animation: travel 3.6s cubic-bezier(0.65, 0, 0.35, 1) 1.4s infinite;
+  }
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes travel {
+  0% {
+    offset-distance: 0%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  75% {
+    offset-distance: 100%;
+    opacity: 1;
+  }
+  85%,
+  100% {
+    offset-distance: 100%;
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
