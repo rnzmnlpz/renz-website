@@ -27,7 +27,10 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
   --t-press: 90ms;
-  --t-hover: 140ms;
+  /* Hover in fast so the element answers the pointer; hover out slower so it
+     settles rather than snapping away. */
+  --t-hover: 150ms;
+  --t-hover-out: 240ms;
   --t-state: 220ms;
   --t-enter: 620ms;
 }
@@ -125,25 +128,33 @@
   .press {
     transition:
       transform var(--t-press) var(--ease-out-expo),
-      background-color var(--t-hover) ease-out,
-      border-color var(--t-hover) ease-out,
-      color var(--t-hover) ease-out,
-      opacity var(--t-hover) ease-out;
+      background-color var(--t-hover-out) ease-in-out,
+      border-color var(--t-hover-out) ease-in-out,
+      color var(--t-hover-out) ease-in-out,
+      opacity var(--t-hover-out) ease-in-out;
+  }
+
+  .press:hover {
+    transition-duration: var(--t-hover);
+    transition-timing-function: ease-out;
   }
 
   .press:active {
     transform: scale(0.97);
+    transition-duration: var(--t-press);
   }
 
   .lift {
     transition:
-      transform var(--t-hover) var(--ease-out-expo),
-      border-color var(--t-hover) ease-out,
-      color var(--t-hover) ease-out;
+      transform var(--t-hover-out) ease-in-out,
+      border-color var(--t-hover-out) ease-in-out,
+      color var(--t-hover-out) ease-in-out;
   }
 
   .lift:hover {
     transform: translateY(-2px);
+    transition-duration: var(--t-hover);
+    transition-timing-function: var(--ease-out-expo);
   }
 
   .lift:active {
@@ -157,24 +168,14 @@
     background-repeat: no-repeat;
     background-position: 0 100%;
     background-size: 0% 1px;
-    transition: background-size var(--t-state) var(--ease-out-expo);
+    transition: background-size var(--t-hover-out) ease-in-out;
   }
 
   .link-underline:hover,
   .link-underline:focus-visible {
     background-size: 100% 1px;
-  }
-
-  /* Rows tint and nudge on hover so long tables stay trackable. */
-  .row-hover {
-    transition:
-      background-color var(--t-hover) ease-out,
-      box-shadow var(--t-hover) ease-out;
-  }
-
-  .row-hover:hover {
-    background-color: color-mix(in srgb, var(--color-panel) 70%, transparent);
-    box-shadow: inset 2px 0 0 var(--color-aqua);
+    transition-duration: var(--t-hover);
+    transition-timing-function: var(--ease-out-expo);
   }
 
   /* ---- Diagram ---------------------------------------------------------*/

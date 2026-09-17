@@ -30,11 +30,11 @@ export default function Experience() {
                   </h3>
                   <p className="mt-1 text-dim">{role.company}</p>
 
-                  <ul className="mt-6 space-y-1">
+                  <ul className="mt-6 space-y-3.5">
                     {role.points.map((point) => (
                       <li
                         key={point}
-                        className="row-hover -mx-3 max-w-[70ch] rounded-sm px-3 py-2 text-[0.95rem] leading-relaxed text-dim"
+                        className="max-w-[70ch] text-[0.95rem] leading-relaxed text-dim"
                       >
                         {point}
                       </li>

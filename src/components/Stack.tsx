@@ -13,12 +13,9 @@ export default function Stack() {
               <h3 className="font-mono text-sm text-aqua">{group.layer}</h3>
               <p className="mt-1.5 text-sm text-faint">{group.caption}</p>
 
-              <ul className="mt-7 space-y-1">
+              <ul className="mt-7 space-y-5">
                 {group.tools.map((tool) => (
-                  <li
-                    key={tool.name}
-                    className="row-hover -mx-3 rounded-sm px-3 py-2.5"
-                  >
+                  <li key={tool.name}>
                     <p translate="no" className="leading-snug text-signal">
                       {tool.name}
                     </p>

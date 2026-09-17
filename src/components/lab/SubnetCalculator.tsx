@@ -9,7 +9,7 @@ const PRESETS = ["192.168.10.42/24", "10.20.0.0/16", "172.16.5.1/20", "203.0.113
    without the whole table moving. */
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="row-hover -mx-3 flex items-baseline justify-between gap-4 rounded-sm border-b border-line px-3 py-3 last:border-0">
+    <div className="flex items-baseline justify-between gap-4 border-b border-line py-3 last:border-0">
       <dt className="font-mono text-xs text-faint">{label}</dt>
       <dd key={value} className="flash font-mono text-sm tabular-nums text-signal">
         {value}

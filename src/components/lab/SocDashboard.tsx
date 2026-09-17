@@ -241,7 +241,7 @@ export default function SocDashboard() {
             return (
               <li
                 key={e.id}
-                className="slide-in row-hover -mx-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 rounded-sm border-b border-line px-3 py-3.5 last:border-0 sm:flex-nowrap"
+                className="slide-in flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line py-3.5 last:border-0 sm:flex-nowrap"
               >
                 <span className="font-mono text-xs tabular-nums text-faint">{clock(e.at)}</span>
                 <span className="inline-flex shrink-0 items-center gap-1.5 font-mono text-xs" style={{ color: s.color }}>

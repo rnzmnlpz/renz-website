@@ -10,11 +10,11 @@ export default function Credentials() {
         <Reveal>
           <div className="border-t border-line pt-6">
             <h3 className="font-mono text-sm text-aqua">Certifications</h3>
-            <ul className="mt-7 space-y-1">
+            <ul className="mt-7 space-y-4">
               {certifications.map((cert) => (
                 <li
                   key={cert.code}
-                  className="row-hover -mx-3 flex items-baseline justify-between gap-6 rounded-sm px-3 py-2.5"
+                  className="flex items-baseline justify-between gap-6"
                 >
                   <span className="text-[0.95rem] leading-snug text-signal">{cert.name}</span>
                   <span translate="no" className="shrink-0 font-mono text-xs text-faint">
