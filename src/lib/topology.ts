@@ -99,7 +99,7 @@ export const DEVICES: Device[] = [
     kind: "endpoint",
     zone: "VLAN 20",
     detail:
-      "Windows Server running directory, name resolution and addressing — the three services whose failure looks like 'the internet is down'.",
+      "Windows Server running directory, name resolution and addressing — the three services whose failure looks like “the internet is down”.",
     facts: ["AD DS with a second domain controller", "DNS forwarders to a filtered resolver", "Runs on VMware with snapshots before change"],
   },
   {

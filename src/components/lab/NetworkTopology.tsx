@@ -57,7 +57,7 @@ export default function NetworkTopology() {
                 rx={2}
                 fill={isSelected ? "#122232" : "#0c1620"}
                 stroke={isSelected ? "#3fd0c9" : "#1b2e40"}
-                className="transition-all duration-200"
+                className="transition-[fill,stroke] duration-200"
               />
               <circle cx={d.x - 54} cy={d.y} r={2.5} fill={KIND_COLOR[d.kind]} opacity={isSelected ? 1 : 0.6} />
               <text x={d.x - 44} y={d.y - 3} className="fill-signal font-mono" style={{ fontSize: 11.5 }}>
@@ -95,7 +95,7 @@ export default function NetworkTopology() {
               }`}
             >
               <span className="h-1.5 w-1.5 shrink-0" style={{ background: KIND_COLOR[d.kind] }} aria-hidden />
-              {d.label}
+              <span translate="no">{d.label}</span>
             </button>
           );
         })}
@@ -109,7 +109,7 @@ export default function NetworkTopology() {
         className="mt-10 border-t border-line pt-6"
       >
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-          <h4 className="font-mono text-sm text-signal">{device.label}</h4>
+          <h3 className="font-mono text-sm text-signal">{device.label}</h3>
           <span className="font-mono text-xs text-faint">{device.zone}</span>
         </div>
 

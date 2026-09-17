@@ -27,13 +27,15 @@ export default function SubnetCalculator() {
         </label>
         <input
           id="cidr"
+          name="cidr"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           spellCheck={false}
           autoComplete="off"
+          translate="no"
           aria-invalid={invalid}
           aria-describedby="cidr-status"
-          placeholder="192.168.1.0/24"
+          placeholder="192.168.1.0/24…"
           className={`mt-2 w-full border-b bg-transparent pb-3 font-mono text-xl text-signal outline-none transition-colors placeholder:text-faint ${
             invalid ? "border-alert" : "border-control focus:border-aqua"
           }`}

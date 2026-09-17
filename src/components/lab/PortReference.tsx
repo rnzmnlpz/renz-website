@@ -49,10 +49,13 @@ export default function PortReference() {
           </label>
           <input
             id="port-search"
+            name="port-search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="rdp, 445, ldap…"
             spellCheck={false}
+            autoComplete="off"
+            translate="no"
             className="mt-2 w-full border-b border-control bg-transparent pb-2.5 font-mono text-base text-signal outline-none transition-colors placeholder:text-faint focus:border-aqua"
           />
         </div>
@@ -100,9 +103,15 @@ export default function PortReference() {
           <tbody>
             {filtered.map((p) => (
               <tr key={`${p.port}-${p.service}`} className="border-b border-line align-top last:border-0">
-                <td className="whitespace-nowrap py-4 pr-6 font-mono text-sm tabular-nums text-signal">{p.port}</td>
-                <td className="whitespace-nowrap py-4 pr-6 font-mono text-xs text-faint">{p.proto}</td>
-                <td className="whitespace-nowrap py-4 pr-6 text-sm text-signal">{p.service}</td>
+                <td translate="no" className="whitespace-nowrap py-4 pr-6 font-mono text-sm tabular-nums text-signal">
+                  {p.port}
+                </td>
+                <td translate="no" className="whitespace-nowrap py-4 pr-6 font-mono text-xs text-faint">
+                  {p.proto}
+                </td>
+                <td translate="no" className="whitespace-nowrap py-4 pr-6 text-sm text-signal">
+                  {p.service}
+                </td>
                 <td className={`whitespace-nowrap py-4 pr-6 font-mono text-xs ${RISK_STYLE[p.risk]}`}>
                   <span aria-hidden>{RISK_GLYPH[p.risk]}</span> {riskLabel[p.risk]}
                 </td>

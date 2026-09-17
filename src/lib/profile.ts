@@ -10,7 +10,7 @@ export const profile = {
   linkedin: "https://www.linkedin.com/in/rjohn-manlapaz",
   github: "https://github.com/rnzmnlpz",
   summary:
-    "I look after enterprise networks end to end: LAN, WAN, VPN and the firewalls in front of them, across cloud and on-premises infrastructure. When something breaks I find out why, fix it, and write it down so it doesn't happen twice.",
+    "I look after enterprise networks end to end: LAN, WAN, VPN and the firewalls in front of them, across cloud and on-premises infrastructure. When something breaks I find out why, fix it, and write it down so it doesn’t happen twice.",
 } as const;
 
 export type Role = {

@@ -17,11 +17,18 @@ type Event = { id: number; at: number; severity: Severity; source: string; messa
 const START = 9 * 3600 + 42 * 60 + 18;
 const GAP = 37;
 
+const TIME = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  second: "2-digit",
+  hour12: false,
+  timeZone: "UTC",
+});
+
+/** Seconds since midnight, formatted through Intl and pinned to UTC so the
+    simulated clock renders identically on the server and the client. */
 function clock(seconds: number) {
-  const s = seconds % 86400;
-  return [Math.floor(s / 3600), Math.floor((s % 3600) / 60), s % 60]
-    .map((n) => String(n).padStart(2, "0"))
-    .join(":");
+  return TIME.format(new Date((seconds % 86400) * 1000));
 }
 
 const SEED: Pick<Event, "severity" | "source" | "message">[] = [
@@ -103,7 +110,7 @@ export default function SocDashboard() {
 
       <div className="mt-16 grid gap-x-16 gap-y-12 lg:grid-cols-2">
         <div className="border-t border-line pt-6">
-          <h4 className="font-mono text-sm text-aqua">Endpoint compliance</h4>
+          <h3 className="font-mono text-sm text-aqua">Endpoint compliance</h3>
           <p className="mt-1.5 font-mono text-xs text-faint">{TOTAL} enrolled devices</p>
 
           <div
@@ -131,14 +138,16 @@ export default function SocDashboard() {
         </div>
 
         <div className="border-t border-line pt-6">
-          <h4 className="font-mono text-sm text-aqua">Firewall rules by hit count</h4>
+          <h3 className="font-mono text-sm text-aqua">Firewall rules by hit count</h3>
           <p className="mt-1.5 font-mono text-xs text-faint">last 24 hours</p>
 
           <ul className="mt-6 space-y-5">
             {RULES.map((r) => (
               <li key={r.rule}>
                 <div className="flex items-baseline justify-between gap-3">
-                  <span className="font-mono text-xs text-signal">{r.rule}</span>
+                  <span translate="no" className="font-mono text-xs text-signal">
+                    {r.rule}
+                  </span>
                   <span className="font-mono text-xs tabular-nums text-faint">
                     {r.hits.toLocaleString("en-US")}
                   </span>
@@ -154,7 +163,7 @@ export default function SocDashboard() {
 
       <div className="mt-16 border-t border-line pt-6">
         <div className="flex items-center justify-between gap-4">
-          <h4 className="font-mono text-sm text-aqua">Event feed</h4>
+          <h3 className="font-mono text-sm text-aqua">Event feed</h3>
           <button
             type="button"
             onClick={() => setRunning((v) => !v)}
@@ -178,7 +187,9 @@ export default function SocDashboard() {
                   {s.label}
                 </span>
                 <span className="shrink-0 font-mono text-xs text-faint">{e.source}</span>
-                <span className="w-full text-sm leading-relaxed text-dim sm:w-auto sm:flex-1">{e.message}</span>
+                <span className="w-full min-w-0 text-sm leading-relaxed text-dim sm:w-auto sm:flex-1">
+                  {e.message}
+                </span>
               </li>
             );
           })}

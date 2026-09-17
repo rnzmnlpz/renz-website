@@ -36,6 +36,18 @@
     color: var(--color-signal);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /* Notched phones: keep content clear of the rounded corners. */
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+
+  button,
+  a,
+  input,
+  [role="tab"],
+  [role="radio"] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
   }
 
   ::selection {
