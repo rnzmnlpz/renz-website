@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  /* Palette: drawn from rack hardware and cable standards.
+     aqua = OM4 multimode fiber (data/link), amber = link-active LED (state). */
+  --color-rack: #060d14;
+  --color-panel: #0c1620;
+  --color-raised: #122232;
+  --color-line: #1b2e40;
+  --color-aqua: #3fd0c9;
+  --color-amber: #f0a33c;
+  --color-alert: #ff5c6c;
+  --color-signal: #e6edf3;
+  --color-dim: #6b8299;
+
+  --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-rack);
+    color: var(--color-signal);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-aqua);
+    color: var(--color-rack);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-aqua);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Only suppress the outline where a component draws its own focus ring. */
+  [data-custom-focus]:focus-visible {
+    outline: none;
+  }
+}
+
+@layer utilities {
+  /* Faint rack-unit grid; sits behind content, never above it. */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(27, 46, 64, 0.35) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(27, 46, 64, 0.35) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
