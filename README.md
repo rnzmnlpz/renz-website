@@ -43,5 +43,19 @@ Four tools that run entirely in the browser:
 
 ## Deploying
 
-Import the repository on Vercel. The defaults are correct for Next.js — no configuration
-needed. Update `metadataBase` in `src/app/layout.tsx` once the final domain is known.
+Pushes to `main` deploy to production automatically; every other branch gets a preview.
+
+The canonical URL is resolved at build time in `src/lib/site.ts` from the environment
+Vercel injects, so **nothing needs editing when the domain changes**. Adding a custom
+domain in the Vercel dashboard updates `VERCEL_PROJECT_PRODUCTION_URL`, and the metadata,
+OG image URLs, sitemap and `robots.txt` follow it. To override (a domain fronted by a
+proxy, say), set `NEXT_PUBLIC_SITE_URL`.
+
+Preview deployments return `Disallow: /` and `noindex`, so they never compete with
+production in search results.
+
+Security headers are set in `next.config.ts`. The CSP deliberately allows `'unsafe-inline'`
+for scripts: a nonce-based policy needs middleware on every request, which would opt the
+whole site out of static prerendering. The site takes no user input and loads no
+third-party scripts, so the trade favours staying static. The directives still block
+external script origins, framing, base-tag injection and plugins.

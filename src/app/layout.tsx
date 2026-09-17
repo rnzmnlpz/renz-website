@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
-import { profile } from "@/lib/profile";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { certifications, profile, stack } from "@/lib/profile";
+import { isIndexable, siteUrl } from "@/lib/site";
 import "./globals.css";
 
 const plexSans = IBM_Plex_Sans({
@@ -20,13 +23,45 @@ const plexMono = IBM_Plex_Mono({
 const description =
   "Network engineer in Metro Manila working across Cisco, Fortinet, MikroTik, Meraki and UniFi, with Azure, Intune and endpoint security. Red team certified.";
 
+/* Derived from the same data the page renders, so the two cannot drift. */
+const tools = stack.flatMap((group) => group.tools.map((tool) => tool.name));
+
+const personSchema = {
+  "@context": "https://schema.org",
+  "@type": "Person",
+  name: profile.name,
+  jobTitle: profile.role,
+  description,
+  email: `mailto:${profile.email}`,
+  url: siteUrl,
+  address: {
+    "@type": "PostalAddress",
+    addressLocality: "Valenzuela City",
+    addressRegion: "Metro Manila",
+    addressCountry: "PH",
+  },
+  sameAs: [profile.linkedin, profile.github],
+  knowsAbout: tools,
+  hasCredential: certifications.map((cert) => ({
+    "@type": "EducationalOccupationalCredential",
+    name: cert.name,
+    credentialCategory: "certificate",
+  })),
+  alumniOf: {
+    "@type": "CollegeOrUniversity",
+    name: "Technological University of the Philippines — Manila",
+  },
+};
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://renzmanlapaz.vercel.app"),
+  metadataBase: new URL(siteUrl),
+  alternates: { canonical: "/" },
   title: {
     default: `${profile.shortName} — Network Engineer`,
     template: `%s — ${profile.shortName}`,
   },
   description,
+  applicationName: profile.shortName,
   keywords: [
     "network engineer",
     "cybersecurity",
@@ -41,8 +76,10 @@ export const metadata: Metadata = {
     "Philippines",
   ],
   authors: [{ name: profile.name, url: profile.linkedin }],
+  creator: profile.name,
   openGraph: {
     type: "profile",
+    url: siteUrl,
     title: `${profile.name} — Network Engineer`,
     description,
     siteName: profile.shortName,
@@ -53,7 +90,10 @@ export const metadata: Metadata = {
     title: `${profile.name} — Network Engineer`,
     description,
   },
-  robots: { index: true, follow: true },
+  // Preview deployments are excluded so they never outrank production.
+  robots: isIndexable
+    ? { index: true, follow: true }
+    : { index: false, follow: false },
 };
 
 export const viewport: Viewport = {
@@ -75,6 +115,13 @@ export default function RootLayout({
           Skip to content
         </a>
         {children}
+        <script
+          type="application/ld+json"
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+        />
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
