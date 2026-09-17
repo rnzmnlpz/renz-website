@@ -58,10 +58,15 @@ function ManilaClock() {
   return <span className="tabular-nums">{time ?? "--:--"} in Manila</span>;
 }
 
-export default function Hero() {
+/* logos arrives as a prop rather than an import so the brand path data stays
+   in the server bundle — importing it here would ship 7KB of SVG to every
+   visitor for markup that never changes. */
+export default function Hero({ logos }: { logos?: React.ReactNode }) {
   return (
     <section id="top" className="relative">
-      <div className="mx-auto grid max-w-5xl gap-16 px-6 pb-24 pt-36 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12 lg:pb-36 lg:pt-44">
+      <div className="mx-auto max-w-5xl px-6 pt-28 sm:px-8 lg:pt-32">{logos}</div>
+
+      <div className="mx-auto grid max-w-5xl gap-16 px-6 pb-24 pt-12 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12 lg:pb-36 lg:pt-16">
         <div>
           <p className="rise flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-faint">
             <span className="inline-flex items-center gap-2 text-aqua">
