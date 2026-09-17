@@ -20,6 +20,16 @@
 
   --font-sans: var(--font-plex-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, monospace;
+
+  /* One motion vocabulary, so every element in the UI moves the same way.
+     Durations follow the micro-interaction scale: feedback is near-instant,
+     state changes are quick, entrances get room to breathe. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --t-press: 90ms;
+  --t-hover: 140ms;
+  --t-state: 220ms;
+  --t-enter: 620ms;
 }
 
 @layer base {
@@ -36,7 +46,6 @@
     color: var(--color-signal);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    /* Notched phones: keep content clear of the rounded corners. */
     padding-left: env(safe-area-inset-left);
     padding-right: env(safe-area-inset-right);
   }
@@ -59,32 +68,169 @@
     outline: 2px solid var(--color-aqua);
     outline-offset: 3px;
     border-radius: 2px;
+    transition: outline-offset var(--t-press) var(--ease-out-expo);
   }
 }
 
 @layer utilities {
-  /* Entrance runs as CSS so the hero text paints without waiting for
-     hydration. Driving this from JS put opacity:0 in the prerendered HTML. */
+  /* ---- Entrance ---------------------------------------------------------
+     The hero runs on CSS so its text paints without waiting for hydration.
+     Driving this from JS is what previously put opacity:0 in the prerender. */
   .rise {
-    animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation: rise var(--t-enter) var(--ease-out-expo) both;
     animation-delay: var(--d, 0ms);
   }
 
-  .text-balance {
-    text-wrap: balance;
+  /* ---- Scroll reveal ----------------------------------------------------
+     Hidden only when scripting is available, so a failed or disabled JS
+     payload leaves the content visible rather than blank. */
+  @media (scripting: enabled) {
+    [data-reveal="pending"] {
+      opacity: 0;
+      transform: translateY(14px);
+    }
   }
 
-  /* pathLength="1" normalises every path, so one dash rule draws them all. */
+  [data-reveal] {
+    transition:
+      opacity var(--t-enter) var(--ease-out-expo),
+      transform var(--t-enter) var(--ease-out-expo);
+    transition-delay: var(--d, 0ms);
+  }
+
+  [data-reveal="shown"] {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Words lift behind a mask — used on section headings only, never the h1. */
+  .word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: bottom;
+  }
+
+  .word > span {
+    display: inline-block;
+    transform: translateY(105%);
+    transition: transform var(--t-enter) var(--ease-out-expo);
+    transition-delay: var(--d, 0ms);
+  }
+
+  [data-reveal="shown"] .word > span {
+    transform: none;
+  }
+
+  /* ---- Interaction -----------------------------------------------------*/
+  .press {
+    transition:
+      transform var(--t-press) var(--ease-out-expo),
+      background-color var(--t-hover) ease-out,
+      border-color var(--t-hover) ease-out,
+      color var(--t-hover) ease-out,
+      opacity var(--t-hover) ease-out;
+  }
+
+  .press:active {
+    transform: scale(0.97);
+  }
+
+  .lift {
+    transition:
+      transform var(--t-hover) var(--ease-out-expo),
+      border-color var(--t-hover) ease-out,
+      color var(--t-hover) ease-out;
+  }
+
+  .lift:hover {
+    transform: translateY(-2px);
+  }
+
+  .lift:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: var(--t-press);
+  }
+
+  /* Underline grows from the left rather than fading in. */
+  .link-underline {
+    background-image: linear-gradient(currentColor, currentColor);
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 0% 1px;
+    transition: background-size var(--t-state) var(--ease-out-expo);
+  }
+
+  .link-underline:hover,
+  .link-underline:focus-visible {
+    background-size: 100% 1px;
+  }
+
+  /* Rows tint and nudge on hover so long tables stay trackable. */
+  .row-hover {
+    transition:
+      background-color var(--t-hover) ease-out,
+      box-shadow var(--t-hover) ease-out;
+  }
+
+  .row-hover:hover {
+    background-color: color-mix(in srgb, var(--color-panel) 70%, transparent);
+    box-shadow: inset 2px 0 0 var(--color-aqua);
+  }
+
+  /* ---- Diagram ---------------------------------------------------------*/
   .link-draw {
     stroke-dasharray: 1;
     stroke-dashoffset: 1;
-    animation: draw 0.7s ease-out both;
+    animation: draw 0.7s var(--ease-out-expo) both;
     animation-delay: var(--d, 0ms);
   }
 
   .packet {
     offset-distance: 0%;
     animation: travel 3.6s cubic-bezier(0.65, 0, 0.35, 1) 1.4s infinite;
+  }
+
+  /* ---- Live data -------------------------------------------------------*/
+  .flash {
+    animation: flash var(--t-state) ease-out;
+  }
+
+  .slide-in {
+    animation: slide-in 380ms var(--ease-out-expo) both;
+  }
+
+  .bar-grow {
+    transform-origin: 0 50%;
+    animation: bar-grow 720ms var(--ease-out-expo) both;
+    animation-delay: var(--d, 0ms);
+  }
+
+  /* ---- Scroll progress -------------------------------------------------
+     Scroll-driven CSS: no JS, no scroll listener, no re-render. Browsers
+     without support simply never show the bar. */
+  .scroll-progress {
+    display: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .scroll-progress {
+      display: block;
+      transform-origin: 0 50%;
+      scale: 0 1;
+      animation: progress linear both;
+      animation-timeline: scroll(root block);
+    }
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -113,17 +259,33 @@
   }
 }
 
-@keyframes rise {
+@keyframes flash {
   from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
+    color: var(--color-aqua);
   }
 }
 
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes progress {
+  to {
+    scale: 1 1;
+  }
+}
+
+/* Everything above degrades to an instant state change. Declared last so it
+   wins, and covers the SVG and scroll-driven animations too. */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -135,5 +297,21 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  .packet,
+  .scroll-progress {
+    display: none;
+  }
+
+  .lift:hover,
+  .press:active {
+    transform: none;
+  }
+
+  .word > span,
+  [data-reveal] {
+    transform: none !important;
+    opacity: 1 !important;
   }
 }

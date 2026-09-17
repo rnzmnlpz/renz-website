@@ -107,6 +107,13 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Belt and braces with the (scripting: enabled) guard in globals.css:
+            nothing that animates in may stay hidden without JavaScript. */}
+        <noscript>
+          <style>{`[data-reveal]{opacity:1!important;transform:none!important}.word>span{transform:none!important}`}</style>
+        </noscript>
+      </head>
       <body className={`${plexSans.variable} ${plexMono.variable} antialiased`}>
         <a
           href="#main"

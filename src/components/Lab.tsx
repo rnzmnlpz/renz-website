@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { labTabs, sections, type LabTabId } from "@/lib/copy";
 import SubnetCalculator from "./lab/SubnetCalculator";
 
@@ -31,8 +31,25 @@ const getServerSnapshot = (): LabTabId => "subnet";
 export default function Lab() {
   const active = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const indicatorRef = useRef<HTMLSpanElement>(null);
 
   const current = labTabs.find((t) => t.id === active)!;
+
+  /* The indicator is positioned by writing to the node directly. Holding it in
+     state would re-render the whole panel on every resize for no benefit. */
+  useEffect(() => {
+    const place = () => {
+      const button = tabRefs.current[active];
+      const bar = indicatorRef.current;
+      if (!button || !bar) return;
+      bar.style.transform = `translateX(${button.offsetLeft}px)`;
+      bar.style.width = `${button.offsetWidth}px`;
+    };
+
+    place();
+    window.addEventListener("resize", place, { passive: true });
+    return () => window.removeEventListener("resize", place);
+  }, [active]);
 
   const select = (id: LabTabId) => {
     const url = new URL(window.location.href);
@@ -70,8 +87,13 @@ export default function Lab() {
             role="tablist"
             aria-label="Lab tools"
             onKeyDown={onKeyDown}
-            className="flex flex-wrap gap-x-7 gap-y-2 border-b border-line/60"
+            className="relative flex flex-wrap gap-x-7 gap-y-2 border-b border-line/60"
           >
+            <span
+              ref={indicatorRef}
+              aria-hidden
+              className="absolute bottom-0 left-0 h-px bg-aqua transition-[transform,width] duration-[var(--t-state)] ease-[var(--ease-out-expo)]"
+            />
             {labTabs.map((tab) => {
               const selected = tab.id === active;
               return (
@@ -86,8 +108,8 @@ export default function Lab() {
                   aria-controls={`panel-${tab.id}`}
                   tabIndex={selected ? 0 : -1}
                   onClick={() => select(tab.id)}
-                  className={`-mb-px border-b py-3 text-sm transition-colors ${
-                    selected ? "border-aqua text-aqua" : "border-transparent text-dim hover:text-signal"
+                  className={`press py-3 text-sm ${
+                    selected ? "text-aqua" : "text-dim hover:text-signal"
                   }`}
                 >
                   {tab.label}
@@ -96,7 +118,9 @@ export default function Lab() {
             })}
           </div>
 
-          <p className="mt-6 max-w-[58ch] text-sm leading-relaxed text-dim">{current.blurb}</p>
+          <p key={`blurb-${active}`} className="slide-in mt-6 max-w-[58ch] text-sm leading-relaxed text-dim">
+            {current.blurb}
+          </p>
 
           <div
             id={`panel-${active}`}
@@ -105,10 +129,13 @@ export default function Lab() {
             tabIndex={0}
             className="mt-10 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-aqua"
           >
-            {active === "subnet" && <SubnetCalculator />}
-            {active === "topology" && <NetworkTopology />}
-            {active === "soc" && <SocDashboard />}
-            {active === "ports" && <PortReference />}
+            {/* Keyed so switching tools replays the entrance. */}
+            <div key={active} className="slide-in">
+              {active === "subnet" && <SubnetCalculator />}
+              {active === "topology" && <NetworkTopology />}
+              {active === "soc" && <SocDashboard />}
+              {active === "ports" && <PortReference />}
+            </div>
           </div>
         </div>
       </div>

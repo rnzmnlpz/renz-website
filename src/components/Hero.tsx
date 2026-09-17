@@ -65,7 +65,10 @@ export default function Hero() {
         <div>
           <p className="rise flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-faint">
             <span className="inline-flex items-center gap-2 text-aqua">
-              <span className="h-1 w-1 rounded-full bg-aqua" aria-hidden />
+              <span className="relative flex h-1.5 w-1.5" aria-hidden>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-aqua opacity-60" />
+                <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-aqua" />
+              </span>
               available for work
             </span>
             <span>{profile.location}</span>
@@ -94,13 +97,13 @@ export default function Hero() {
           >
             <a
               href="#lab"
-              className="rounded-sm bg-signal px-5 py-3 text-sm font-medium text-rack transition-opacity hover:opacity-85"
+              className="lift press rounded-sm bg-signal px-5 py-3 text-sm font-medium text-rack hover:bg-aqua"
             >
               Run the tools
             </a>
             <a
               href="#contact"
-              className="border-b border-control pb-1 text-sm text-signal transition-colors hover:border-aqua hover:text-aqua"
+              className="press link-underline text-sm text-signal hover:text-aqua"
             >
               Get in touch
             </a>

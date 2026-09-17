@@ -1,16 +1,51 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatCount, parseSubnet } from "@/lib/subnet";
 
 const PRESETS = ["192.168.10.42/24", "10.20.0.0/16", "172.16.5.1/20", "203.0.113.9/30", "10.0.0.1/31"];
 
+/* Keying the value replays the flash, so a changed number announces itself
+   without the whole table moving. */
 function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex items-baseline justify-between gap-4 border-b border-line py-3 last:border-0">
+    <div className="row-hover -mx-3 flex items-baseline justify-between gap-4 rounded-sm border-b border-line px-3 py-3 last:border-0">
       <dt className="font-mono text-xs text-faint">{label}</dt>
-      <dd className="font-mono text-sm tabular-nums text-signal">{value}</dd>
+      <dd key={value} className="flash font-mono text-sm tabular-nums text-signal">
+        {value}
+      </dd>
     </div>
+  );
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  useEffect(() => () => clearTimeout(timer.current), []);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setCopied(false), 1600);
+    } catch {
+      // Clipboard blocked (insecure context or denied permission) — the values
+      // stay selectable, so there is nothing to recover from.
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={copy}
+      className="press min-h-11 border border-control px-3 font-mono text-xs text-dim hover:border-aqua hover:text-aqua"
+    >
+      <span key={String(copied)} className="slide-in inline-block">
+        {copied ? "Copied" : "Copy results"}
+      </span>
+    </button>
   );
 }
 
@@ -51,7 +86,7 @@ export default function SubnetCalculator() {
               key={preset}
               type="button"
               onClick={() => setInput(preset)}
-              className={`min-h-11 border px-3 font-mono text-xs transition-colors ${
+              className={`press min-h-11 border px-3 font-mono text-xs ${
                 input === preset
                   ? "border-aqua text-aqua"
                   : "border-control text-dim hover:border-aqua hover:text-signal"
@@ -86,10 +121,30 @@ export default function SubnetCalculator() {
 
       {result && (
         <div>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-line pb-4 font-mono text-xs">
-            <span className="text-aqua">/{result.prefix}</span>
-            <span className={result.scope === "Public" ? "text-amber" : "text-dim"}>{result.scope}</span>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-3 border-b border-line pb-4 font-mono text-xs">
+            <span key={result.prefix} className="flash text-aqua">
+              /{result.prefix}
+            </span>
+            <span
+              key={result.scope}
+              className={`flash ${result.scope === "Public" ? "text-amber" : "text-dim"}`}
+            >
+              {result.scope}
+            </span>
             <span className="text-dim">{formatCount(result.usableHosts)} usable</span>
+            <span className="ml-auto">
+              <CopyButton
+                text={[
+                  `address   ${result.address}/${result.prefix}`,
+                  `network   ${result.network}`,
+                  `broadcast ${result.broadcast}`,
+                  `range     ${result.firstHost} - ${result.lastHost}`,
+                  `netmask   ${result.netmask}`,
+                  `wildcard  ${result.wildcard}`,
+                  `hosts     ${formatCount(result.usableHosts)}`,
+                ].join("\n")}
+              />
+            </span>
           </div>
 
           <dl className="mt-2">

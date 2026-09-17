@@ -53,11 +53,56 @@ const POOL: Pick<Event, "severity" | "source" | "message">[] = [
 ];
 
 const KPIS = [
-  { label: "Endpoints managed", value: "312", note: "Intune + MDM" },
-  { label: "Blocked today", value: "1,847", note: "perimeter drops" },
-  { label: "Open alerts", value: "4", note: "1 critical" },
-  { label: "Mean time to fix", value: "18m", note: "last 30 days" },
+  { label: "Endpoints managed", value: 312, suffix: "", note: "Intune + MDM" },
+  { label: "Blocked today", value: 1847, suffix: "", note: "perimeter drops" },
+  { label: "Open alerts", value: 4, suffix: "", note: "1 critical" },
+  { label: "Mean time to fix", value: 18, suffix: "m", note: "last 30 days" },
 ];
+
+/* Counts up once, when the tile first scrolls into view. Writes straight to
+   the node — putting the tween in state would re-render the dashboard on
+   every frame. Renders the final value on the server so the figure is right
+   with JavaScript disabled. */
+function CountUp({ to, suffix }: { to: number; suffix: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    let frame = 0;
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+
+        const started = performance.now();
+        const tick = (now: number) => {
+          const progress = Math.min((now - started) / 900, 1);
+          const eased = 1 - (1 - progress) ** 3;
+          el.textContent = Math.round(to * eased).toLocaleString("en-US") + suffix;
+          if (progress < 1) frame = requestAnimationFrame(tick);
+        };
+        frame = requestAnimationFrame(tick);
+      },
+      { threshold: 0.4 },
+    );
+
+    io.observe(el);
+    return () => {
+      io.disconnect();
+      cancelAnimationFrame(frame);
+    };
+  }, [to, suffix]);
+
+  return (
+    <span ref={ref}>
+      {to.toLocaleString("en-US")}
+      {suffix}
+    </span>
+  );
+}
 
 const COMPLIANCE = [
   { label: "Compliant", value: 287, color: "#3fd0c9" },
@@ -102,7 +147,9 @@ export default function SocDashboard() {
         {KPIS.map((kpi) => (
           <div key={kpi.label} className="border-t border-line pt-5">
             <p className="font-mono text-xs text-faint">{kpi.label}</p>
-            <p className="mt-3 text-4xl font-medium tabular-nums tracking-tight text-signal">{kpi.value}</p>
+            <p className="mt-3 text-4xl font-medium tabular-nums tracking-tight text-signal">
+              <CountUp to={kpi.value} suffix={kpi.suffix} />
+            </p>
             <p className="mt-1 font-mono text-xs text-faint">{kpi.note}</p>
           </div>
         ))}
@@ -118,8 +165,16 @@ export default function SocDashboard() {
             role="img"
             aria-label={COMPLIANCE.map((s) => `${s.label} ${s.value}`).join(", ")}
           >
-            {COMPLIANCE.map((seg) => (
-              <div key={seg.label} style={{ width: `${(seg.value / TOTAL) * 100}%`, background: seg.color }} />
+            {COMPLIANCE.map((seg, i) => (
+              <div
+                key={seg.label}
+                className="bar-grow"
+                style={{
+                  width: `${(seg.value / TOTAL) * 100}%`,
+                  background: seg.color,
+                  animationDelay: `${i * 120}ms`,
+                }}
+              />
             ))}
           </div>
 
@@ -142,7 +197,7 @@ export default function SocDashboard() {
           <p className="mt-1.5 font-mono text-xs text-faint">last 24 hours</p>
 
           <ul className="mt-6 space-y-5">
-            {RULES.map((r) => (
+            {RULES.map((r, i) => (
               <li key={r.rule}>
                 <div className="flex items-baseline justify-between gap-3">
                   <span translate="no" className="font-mono text-xs text-signal">
@@ -153,7 +208,10 @@ export default function SocDashboard() {
                   </span>
                 </div>
                 <div className="mt-2 h-1 w-full bg-panel">
-                  <div className="h-1 bg-aqua" style={{ width: `${(r.hits / MAX_HITS) * 100}%` }} />
+                  <div
+                    className="bar-grow h-1 bg-aqua"
+                    style={{ width: `${(r.hits / MAX_HITS) * 100}%`, animationDelay: `${i * 90}ms` }}
+                  />
                 </div>
               </li>
             ))}
@@ -167,19 +225,23 @@ export default function SocDashboard() {
           <button
             type="button"
             onClick={() => setRunning((v) => !v)}
-            className="min-h-11 border border-control px-4 font-mono text-xs text-dim transition-colors hover:border-aqua hover:text-aqua"
+            className="press min-h-11 border border-control px-4 font-mono text-xs text-dim hover:border-aqua hover:text-aqua"
           >
-            {running ? "Pause feed" : "Resume feed"}
+            <span key={String(running)} className="slide-in inline-block">
+              {running ? "Pause feed" : "Resume feed"}
+            </span>
           </button>
         </div>
 
         <ul className="mt-4">
           {events.map((e) => {
             const s = SEVERITY[e.severity];
+            // Only a freshly mounted row animates; stable keys keep the rest
+            // still as the list shifts down.
             return (
               <li
                 key={e.id}
-                className="flex flex-wrap items-baseline gap-x-4 gap-y-1 border-b border-line py-3.5 last:border-0 sm:flex-nowrap"
+                className="slide-in row-hover -mx-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 rounded-sm border-b border-line px-3 py-3.5 last:border-0 sm:flex-nowrap"
               >
                 <span className="font-mono text-xs tabular-nums text-faint">{clock(e.at)}</span>
                 <span className="inline-flex shrink-0 items-center gap-1.5 font-mono text-xs" style={{ color: s.color }}>

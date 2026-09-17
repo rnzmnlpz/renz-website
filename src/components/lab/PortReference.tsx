@@ -67,7 +67,7 @@ export default function PortReference() {
               type="button"
               onClick={() => setCategory(c)}
               aria-pressed={category === c}
-              className={`min-h-11 border px-3 font-mono text-xs transition-colors ${
+              className={`press min-h-11 border px-3 font-mono text-xs ${
                 category === c
                   ? "border-aqua text-aqua"
                   : "border-control text-dim hover:border-aqua hover:text-signal"
@@ -80,7 +80,9 @@ export default function PortReference() {
       </div>
 
       <p className="mt-6 font-mono text-xs text-faint" aria-live="polite">
-        {filtered.length} of {ports.length} entries
+        <span key={filtered.length} className="flash inline-block">
+          {filtered.length} of {ports.length} entries
+        </span>
       </p>
 
       {/* Table — md and up */}
@@ -102,7 +104,7 @@ export default function PortReference() {
           </thead>
           <tbody>
             {filtered.map((p) => (
-              <tr key={`${p.port}-${p.service}`} className="border-b border-line align-top last:border-0">
+              <tr key={`${p.port}-${p.service}`} className="row-hover border-b border-line align-top last:border-0">
                 <td translate="no" className="whitespace-nowrap py-4 pr-6 font-mono text-sm tabular-nums text-signal">
                   {p.port}
                 </td>
@@ -125,7 +127,7 @@ export default function PortReference() {
       {/* Cards — small screens */}
       <ul className="mt-4 md:hidden">
         {filtered.map((p) => (
-          <li key={`${p.port}-${p.service}`} className="border-b border-line py-5 last:border-0">
+          <li key={`${p.port}-${p.service}`} className="row-hover -mx-3 rounded-sm border-b border-line px-3 py-5 last:border-0">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span className="font-mono text-sm tabular-nums text-signal">{p.port}</span>
               <span className="font-mono text-xs text-faint">{p.proto}</span>

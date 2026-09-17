@@ -6,13 +6,21 @@ import type { NextConfig } from "next";
    accepts 'unsafe-inline' for the framework's hydration and style tags. The
    directives still block external script origins, framing, base-tag injection
    and plugins. */
+/* Vercel serves analytics same-origin under /_vercel/ in production but from
+   va.vercel-scripts.com in development and on preview builds, and Speed
+   Insights reports to vitals.vercel-insights.com. Both are named explicitly:
+   without them the CSP silently blocks the scripts and the dashboards stay
+   empty with no error anywhere except the browser console. */
+const vercelAnalytics = "https://va.vercel-scripts.com";
+const vercelVitals = "https://vitals.vercel-insights.com";
+
 const csp = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  `script-src 'self' 'unsafe-inline' ${vercelAnalytics}`,
   "style-src 'self' 'unsafe-inline'",
   "img-src 'self' data: blob:",
   "font-src 'self' data:",
-  "connect-src 'self'",
+  `connect-src 'self' ${vercelAnalytics} ${vercelVitals}`,
   "form-action 'self'",
   "base-uri 'self'",
   "object-src 'none'",

@@ -80,11 +80,17 @@ export default function Nav() {
               key={s.id}
               href={`#${s.id}`}
               aria-current={active === s.id ? "true" : undefined}
-              className={`text-sm transition-colors ${
+              className={`press relative py-1 text-sm ${
                 active === s.id ? "text-aqua" : "text-dim hover:text-signal"
               }`}
             >
               {s.label}
+              <span
+                aria-hidden
+                className={`absolute inset-x-0 -bottom-px h-px origin-left bg-aqua transition-transform duration-[var(--t-state)] ease-[var(--ease-out-expo)] ${
+                  active === s.id ? "scale-x-100" : "scale-x-0"
+                }`}
+              />
             </a>
           ))}
         </div>
@@ -96,27 +102,43 @@ export default function Nav() {
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? "Close menu" : "Open menu"}
-          className="-mr-2 grid h-11 w-11 place-items-center text-signal md:hidden"
+          className="press -mr-2 grid h-11 w-11 place-items-center text-signal md:hidden"
         >
-          <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
+          <svg
+            viewBox="0 0 20 20"
+            className={`h-4 w-4 transition-transform duration-[var(--t-state)] ease-[var(--ease-spring)] ${
+              open ? "rotate-90" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={1.5}
+            aria-hidden
+          >
             {open ? <path d="M5 5l10 10M15 5L5 15" /> : <path d="M3 6h14M3 13h14" />}
           </svg>
         </button>
       </nav>
 
+      {/* Scroll position, driven entirely by CSS scroll-timeline. */}
+      <div
+        className="scroll-progress absolute inset-x-0 bottom-0 h-px bg-aqua"
+        aria-hidden
+      />
+
       {open && (
         <div
           id="mobile-nav"
-          className="max-h-[calc(100dvh-5rem)] overflow-y-auto bg-rack/95 backdrop-blur-md md:hidden"
+          className="slide-in max-h-[calc(100dvh-5rem)] overflow-y-auto bg-rack/95 backdrop-blur-md md:hidden"
         >
           <div className="mx-auto flex max-w-5xl flex-col px-6 pb-4 sm:px-8">
-            {SECTIONS.map((s) => (
+            {SECTIONS.map((s, i) => (
               <a
                 key={s.id}
                 href={`#${s.id}`}
                 aria-current={active === s.id ? "true" : undefined}
                 onClick={() => setOpen(false)}
-                className={`flex min-h-11 items-center border-b border-line/40 text-sm last:border-0 ${
+                style={{ animationDelay: `${i * 35}ms` }}
+                className={`slide-in press flex min-h-11 items-center border-b border-line/40 text-sm last:border-0 ${
                   active === s.id ? "text-aqua" : "text-dim"
                 }`}
               >

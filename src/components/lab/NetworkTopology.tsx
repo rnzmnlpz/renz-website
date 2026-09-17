@@ -90,7 +90,7 @@ export default function NetworkTopology() {
               aria-checked={isSelected}
               tabIndex={isSelected ? 0 : -1}
               onClick={() => setSelected(d.id)}
-              className={`flex min-h-11 items-center gap-2 border px-3 font-mono text-xs transition-colors ${
+              className={`press flex min-h-11 items-center gap-2 border px-3 font-mono text-xs ${
                 isSelected ? "border-aqua text-aqua" : "border-control text-dim hover:border-aqua hover:text-signal"
               }`}
             >
