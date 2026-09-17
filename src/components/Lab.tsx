@@ -1,7 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useRef, useState } from "react";
+import { useRef, useSyncExternalStore } from "react";
+import { labTabs, sections, type LabTabId } from "@/lib/copy";
 import SubnetCalculator from "./lab/SubnetCalculator";
 
 /* Only the default tab ships eagerly; the rest load on first selection. */
@@ -9,33 +10,50 @@ const NetworkTopology = dynamic(() => import("./lab/NetworkTopology"));
 const SocDashboard = dynamic(() => import("./lab/SocDashboard"));
 const PortReference = dynamic(() => import("./lab/PortReference"));
 
-const TABS = [
-  { id: "subnet", label: "Subnet calculator", blurb: "IPv4 addressing calculated live, including the /31 and /32 cases." },
-  { id: "topology", label: "Topology", blurb: "A small-enterprise network, device by device. Select any node to see how it is configured." },
-  { id: "soc", label: "Security console", blurb: "The console I watch during an incident." },
-  { id: "ports", label: "Port reference", blurb: "The ports that come up in hardening reviews, with the posture I would take on each." },
-] as const;
+const isTabId = (value: string | null): value is LabTabId =>
+  labTabs.some((t) => t.id === value);
 
-type TabId = (typeof TABS)[number]["id"];
+/* The open tool lives in the URL so it can be linked and shared. Reading it
+   through useSyncExternalStore keeps the prerender static (server always sees
+   the default) and picks up back/forward navigation for free. */
+function subscribe(onChange: () => void) {
+  window.addEventListener("popstate", onChange);
+  return () => window.removeEventListener("popstate", onChange);
+}
+
+function getSnapshot(): LabTabId {
+  const tool = new URLSearchParams(window.location.search).get("tool");
+  return isTabId(tool) ? tool : "subnet";
+}
+
+const getServerSnapshot = (): LabTabId => "subnet";
 
 export default function Lab() {
-  const [active, setActive] = useState<TabId>("subnet");
+  const active = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  const current = TABS.find((t) => t.id === active)!;
+  const current = labTabs.find((t) => t.id === active)!;
+
+  const select = (id: LabTabId) => {
+    const url = new URL(window.location.href);
+    url.searchParams.set("tool", id);
+    window.history.replaceState(null, "", url);
+    // replaceState does not fire popstate, so nudge the store ourselves.
+    window.dispatchEvent(new Event("popstate"));
+  };
 
   const onKeyDown = (e: React.KeyboardEvent) => {
-    const i = TABS.findIndex((t) => t.id === active);
+    const i = labTabs.findIndex((t) => t.id === active);
     let next = i;
-    if (e.key === "ArrowRight") next = (i + 1) % TABS.length;
-    else if (e.key === "ArrowLeft") next = (i - 1 + TABS.length) % TABS.length;
+    if (e.key === "ArrowRight") next = (i + 1) % labTabs.length;
+    else if (e.key === "ArrowLeft") next = (i - 1 + labTabs.length) % labTabs.length;
     else if (e.key === "Home") next = 0;
-    else if (e.key === "End") next = TABS.length - 1;
+    else if (e.key === "End") next = labTabs.length - 1;
     else return;
 
     e.preventDefault();
-    const id = TABS[next].id;
-    setActive(id);
+    const id = labTabs[next].id;
+    select(id);
     tabRefs.current[id]?.focus();
   };
 
@@ -43,12 +61,9 @@ export default function Lab() {
     <section id="lab" className="scroll-mt-24">
       <div className="mx-auto max-w-5xl px-6 py-24 sm:px-8 lg:py-32">
         <h2 className="max-w-[20ch] text-[clamp(2rem,4.5vw,3rem)] font-medium leading-[1.05] tracking-[-0.03em] text-balance">
-          Four tools. Run them yourself.
+          {sections.lab.title}
         </h2>
-        <p className="mt-6 max-w-[58ch] text-lg leading-relaxed text-dim">
-          The subnet maths is calculated in your browser, the topology is a network I would deploy,
-          and the port table carries the advice I would give on each one.
-        </p>
+        <p className="mt-6 max-w-[58ch] text-lg leading-relaxed text-dim">{sections.lab.intro}</p>
 
         <div className="mt-16">
           <div
@@ -57,7 +72,7 @@ export default function Lab() {
             onKeyDown={onKeyDown}
             className="flex flex-wrap gap-x-7 gap-y-2 border-b border-line/60"
           >
-            {TABS.map((tab) => {
+            {labTabs.map((tab) => {
               const selected = tab.id === active;
               return (
                 <button
@@ -70,11 +85,9 @@ export default function Lab() {
                   aria-selected={selected}
                   aria-controls={`panel-${tab.id}`}
                   tabIndex={selected ? 0 : -1}
-                  onClick={() => setActive(tab.id)}
+                  onClick={() => select(tab.id)}
                   className={`-mb-px border-b py-3 text-sm transition-colors ${
-                    selected
-                      ? "border-aqua text-aqua"
-                      : "border-transparent text-dim hover:text-signal"
+                    selected ? "border-aqua text-aqua" : "border-transparent text-dim hover:text-signal"
                   }`}
                 >
                   {tab.label}
@@ -90,8 +103,7 @@ export default function Lab() {
             role="tabpanel"
             aria-labelledby={`tab-${active}`}
             tabIndex={0}
-            data-custom-focus
-            className="mt-10 outline-none"
+            className="mt-10 rounded-sm focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-aqua"
           >
             {active === "subnet" && <SubnetCalculator />}
             {active === "topology" && <NetworkTopology />}

@@ -1,12 +1,13 @@
 import Section from "./Section";
+import { sections } from "@/lib/copy";
 import { stack } from "@/lib/profile";
 
 export default function Stack() {
   return (
     <Section
       id="stack"
-      title="The kit, grouped by layer."
-      intro="The platforms I work in daily, arranged by the layer they sit on rather than by vendor. A firewall and an access point fail in different ways and belong in different groups."
+      title={sections.stack.title}
+      intro={sections.stack.intro}
     >
       <div className="grid gap-x-16 gap-y-14 sm:grid-cols-2">
         {stack.map((group) => (
@@ -17,7 +18,9 @@ export default function Stack() {
             <ul className="mt-7 space-y-5">
               {group.tools.map((tool) => (
                 <li key={tool.name}>
-                  <p className="leading-snug text-signal">{tool.name}</p>
+                  <p translate="no" className="leading-snug text-signal">
+                    {tool.name}
+                  </p>
                   <p className="mt-1 text-sm leading-relaxed text-dim">{tool.note}</p>
                 </li>
               ))}

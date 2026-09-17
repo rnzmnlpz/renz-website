@@ -1,12 +1,13 @@
 import Section from "./Section";
+import { sections } from "@/lib/copy";
 import { roles } from "@/lib/profile";
 
 export default function Experience() {
   return (
     <Section
       id="experience"
-      title="Three years of being the person the network calls."
-      intro="Each role added a layer: endpoints first, then identity and cloud, then the firewall itself."
+      title={sections.experience.title}
+      intro={sections.experience.intro}
     >
       <ol className="space-y-16">
         {roles.map((role) => (

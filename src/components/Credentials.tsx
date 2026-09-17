@@ -1,12 +1,13 @@
 import Section from "./Section";
+import { sections } from "@/lib/copy";
 import { certifications, education, languages, skills } from "@/lib/profile";
 
 export default function Credentials() {
   return (
     <Section
       id="credentials"
-      title="Certified on both sides of the firewall."
-      intro="Red team operations alongside Fortinet and Cisco defence. Knowing how a network gets broken into is what makes the hardening specific."
+      title={sections.credentials.title}
+      intro={sections.credentials.intro}
     >
       <div className="grid gap-x-16 gap-y-14 lg:grid-cols-2">
         <div className="border-t border-line pt-6">

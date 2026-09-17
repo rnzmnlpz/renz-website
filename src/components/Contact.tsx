@@ -1,3 +1,4 @@
+import { sections } from "@/lib/copy";
 import { profile } from "@/lib/profile";
 
 const LINKS = [
@@ -13,12 +14,9 @@ export default function Contact() {
       <section id="contact" className="scroll-mt-24">
         <div className="mx-auto max-w-5xl px-6 py-24 sm:px-8 lg:py-32">
           <h2 className="max-w-[16ch] text-[clamp(2rem,4.5vw,3rem)] font-medium leading-[1.05] tracking-[-0.03em] text-balance">
-            Hiring for a network role?
+            {sections.contact.title}
           </h2>
-          <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-dim">
-            I am open to network engineering and infrastructure security roles, on site in Metro
-            Manila or remote. Tell me what your network looks like now and where it keeps hurting.
-          </p>
+          <p className="mt-6 max-w-[52ch] text-lg leading-relaxed text-dim">{sections.contact.intro}</p>
 
           <a
             href={`mailto:${profile.email}`}
