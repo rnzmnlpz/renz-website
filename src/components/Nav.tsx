@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { profile } from "@/lib/profile";
 
 const SECTIONS = [
@@ -15,6 +15,7 @@ export default function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [active, setActive] = useState<string>("");
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -41,49 +42,61 @@ export default function Nav() {
     return () => observer.disconnect();
   }, []);
 
+  const close = () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  // The panel is a disclosure, not a dialog — Escape closes it, focus is not trapped.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    const mq = window.matchMedia("(min-width: 768px)");
+    const onChange = () => setOpen(false);
+    document.addEventListener("keydown", onKey);
+    mq.addEventListener("change", onChange);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      mq.removeEventListener("change", onChange);
+    };
+  }, [open]);
+
   return (
     <header
       className={`fixed inset-x-0 top-0 z-40 transition-colors duration-300 ${
-        scrolled ? "border-b border-line bg-rack/85 backdrop-blur-md" : "border-b border-transparent"
+        scrolled ? "bg-rack/80 backdrop-blur-md" : ""
       }`}
     >
-      <nav className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4 sm:px-8" aria-label="Primary">
-        <a href="#top" className="group flex items-center gap-2.5 font-mono text-sm">
-          <span className="grid h-7 w-7 place-items-center rounded-sm border border-aqua/40 text-[0.65rem] font-semibold text-aqua">
-            {profile.initials}
-          </span>
-          <span className="hidden text-signal transition-colors group-hover:text-aqua sm:inline">
-            {profile.shortName}
-          </span>
+      <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5 sm:px-8" aria-label="Primary">
+        <a href="#top" className="font-mono text-sm text-signal transition-colors hover:text-aqua">
+          {profile.initials}
         </a>
 
-        <div className="hidden items-center gap-1 md:flex">
+        <div className="hidden items-center gap-8 md:flex">
           {SECTIONS.map((s) => (
             <a
               key={s.id}
               href={`#${s.id}`}
-              className={`rounded-sm px-3 py-2 font-mono text-[0.8rem] transition-colors ${
+              aria-current={active === s.id ? "true" : undefined}
+              className={`text-sm transition-colors ${
                 active === s.id ? "text-aqua" : "text-dim hover:text-signal"
               }`}
             >
               {s.label}
             </a>
           ))}
-          <a
-            href={`mailto:${profile.email}`}
-            className="ml-2 rounded-sm border border-line px-3.5 py-2 font-mono text-[0.8rem] text-signal transition-colors hover:border-aqua/60 hover:text-aqua"
-          >
-            Hire me
-          </a>
         </div>
 
         <button
+          ref={triggerRef}
           type="button"
-          onClick={() => setOpen((v) => !v)}
+          onClick={() => (open ? close() : setOpen(true))}
           aria-expanded={open}
           aria-controls="mobile-nav"
           aria-label={open ? "Close menu" : "Open menu"}
-          className="grid h-9 w-9 place-items-center rounded-sm border border-line text-signal transition-colors hover:border-aqua/60 md:hidden"
+          className="-mr-2 grid h-11 w-11 place-items-center text-signal md:hidden"
         >
           <svg viewBox="0 0 20 20" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden>
             {open ? <path d="M5 5l10 10M15 5L5 15" /> : <path d="M3 6h14M3 13h14" />}
@@ -92,14 +105,18 @@ export default function Nav() {
       </nav>
 
       {open && (
-        <div id="mobile-nav" className="border-t border-line bg-rack/95 backdrop-blur-md md:hidden">
-          <div className="mx-auto flex max-w-6xl flex-col px-5 py-2 sm:px-8">
+        <div
+          id="mobile-nav"
+          className="max-h-[calc(100dvh-5rem)] overflow-y-auto bg-rack/95 backdrop-blur-md md:hidden"
+        >
+          <div className="mx-auto flex max-w-5xl flex-col px-6 pb-4 sm:px-8">
             {SECTIONS.map((s) => (
               <a
                 key={s.id}
                 href={`#${s.id}`}
+                aria-current={active === s.id ? "true" : undefined}
                 onClick={() => setOpen(false)}
-                className={`border-b border-line/50 py-3.5 font-mono text-sm last:border-0 ${
+                className={`flex min-h-11 items-center border-b border-line/40 text-sm last:border-0 ${
                   active === s.id ? "text-aqua" : "text-dim"
                 }`}
               >
