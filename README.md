@@ -1,4 +1,4 @@
-# renz-website
+# renz-net
 
 Portfolio for Renz John M. Manlapaz — network engineer working across Cisco, Fortinet,
 MikroTik, Meraki and UniFi, with Azure, Intune and endpoint security.
