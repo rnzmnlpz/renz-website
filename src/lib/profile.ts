@@ -132,9 +132,13 @@ export type Certification = {
   name: string;
   code: string;
   family: string;
-  /** Path under /public. Present only where the certificate itself is on file;
-      the rest render as plain text rather than a link that goes nowhere. */
-  file?: string;
+  /** Path under /public to the certificate itself. */
+  file: string;
+  /** The issuer's own verification page, where the certificate prints one.
+      Only Red Team Leaders does; the Cisco and Linux Foundation certificates
+      carry an ID that is checked on the issuer's site, not a direct URL, so
+      they have none rather than a guessed link that leads nowhere. */
+  verify?: string;
 };
 
 export const certifications: Certification[] = [
@@ -143,23 +147,45 @@ export const certifications: Certification[] = [
     code: "CCEP",
     family: "Cybersecurity",
     file: "/certificates/ccep.pdf",
+    verify: "https://courses.redteamleaders.com/exam-completion/b8478e9a248b3b41",
   },
   {
     name: "Certified Red Team Operations Management",
     code: "CRTOM",
     family: "Offensive",
     file: "/certificates/crtom.pdf",
+    verify: "https://courses.redteamleaders.com/exam-completion/8541891762119da9",
   },
-  { name: "NSE 1 Cybersecurity and Cloud Fundamentals", code: "NSE 1", family: "Fortinet" },
-  { name: "NSE 2 Introduction to Next Generation Firewall", code: "NSE 2", family: "Fortinet" },
-  { name: "Cisco Network Defense", code: "NetDef", family: "Cisco" },
+  {
+    name: "NSE 1 Cybersecurity and Cloud Fundamentals",
+    code: "NSE 1",
+    family: "Fortinet",
+    file: "/certificates/nse1-cybersecurity-cloud-fundamentals.pdf",
+  },
+  {
+    name: "NSE 2 Introduction to Next Generation Firewall",
+    code: "NSE 2",
+    family: "Fortinet",
+    file: "/certificates/nse2-next-gen-firewall.pdf",
+  },
+  {
+    name: "Cisco Network Defense",
+    code: "NetDef",
+    family: "Cisco",
+    file: "/certificates/cisco-network-defense.pdf",
+  },
   {
     name: "Cisco Endpoint Security",
     code: "EndSec",
     family: "Cisco",
     file: "/certificates/cisco-endpoint-security.pdf",
   },
-  { name: "Introduction to Cloud Infrastructure Technologies", code: "LFS151", family: "Linux Foundation" },
+  {
+    name: "Introduction to Cloud Infrastructure Technologies",
+    code: "LFS151",
+    family: "Linux Foundation",
+    file: "/certificates/lfs151-cloud-infrastructure.pdf",
+  },
   {
     name: "Cybersecurity Essentials",
     code: "LFC108",
