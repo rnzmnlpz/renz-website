@@ -64,9 +64,9 @@ function ManilaClock() {
 export default function Hero({ logos }: { logos?: React.ReactNode }) {
   return (
     <section id="top" className="relative">
-      <div className="mx-auto max-w-5xl px-6 pt-28 sm:px-8 lg:pt-32">{logos}</div>
+      <div className="mx-auto max-w-5xl px-6 pt-20 sm:px-8 lg:pt-24">{logos}</div>
 
-      <div className="mx-auto grid max-w-5xl gap-16 px-6 pb-24 pt-12 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12 lg:pb-36 lg:pt-16">
+      <div className="mx-auto grid max-w-5xl gap-14 px-6 pb-24 pt-8 sm:px-8 lg:grid-cols-[1fr_auto] lg:items-center lg:gap-12 lg:pb-32 lg:pt-12">
         <div>
           <p className="rise flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-faint">
             <span className="inline-flex items-center gap-2 text-aqua">
@@ -81,7 +81,7 @@ export default function Hero({ logos }: { logos?: React.ReactNode }) {
           </p>
 
           <h1
-            className="rise mt-8 text-[clamp(2.75rem,8vw,5rem)] font-medium leading-[0.95] tracking-[-0.045em]"
+            className="rise mt-6 text-[clamp(2.5rem,7vw,4.5rem)] font-medium leading-[0.95] tracking-[-0.045em]"
             style={{ "--d": "60ms" } as React.CSSProperties}
           >
             Renz John
@@ -89,15 +89,17 @@ export default function Hero({ logos }: { logos?: React.ReactNode }) {
             Manlapaz
           </h1>
 
+          {/* The résumé summary runs long. Kept verbatim, so the measure widens
+              and the type steps down to stop it burying the buttons below. */}
           <p
-            className="rise mt-7 max-w-[52ch] text-lg leading-relaxed text-dim sm:text-xl"
+            className="rise mt-5 max-w-[64ch] text-base leading-relaxed text-dim sm:text-lg"
             style={{ "--d": "120ms" } as React.CSSProperties}
           >
             {profile.summary}
           </p>
 
           <div
-            className="rise mt-10 flex flex-wrap items-center gap-x-8 gap-y-4"
+            className="rise mt-8 flex flex-wrap items-center gap-x-8 gap-y-4"
             style={{ "--d": "180ms" } as React.CSSProperties}
           >
             <a
@@ -116,7 +118,7 @@ export default function Hero({ logos }: { logos?: React.ReactNode }) {
         </div>
 
         <figure
-          className="rise lg:w-[34rem]"
+          className="rise lg:w-[26rem]"
           style={{ "--d": "240ms" } as React.CSSProperties}
         >
           {/* The list is the accessible description; the diagram is decoration. */}

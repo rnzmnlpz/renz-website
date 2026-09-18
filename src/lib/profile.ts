@@ -10,7 +10,7 @@ export const profile = {
   linkedin: "https://www.linkedin.com/in/rjohn-manlapaz",
   github: "https://github.com/rnzmnlpz",
   summary:
-    "I look after enterprise networks end to end: LAN, WAN, VPN and the firewalls in front of them, across cloud and on-premises infrastructure. When something breaks I find out why, fix it, and write it down so it doesn’t happen twice.",
+    "Results-oriented Network Engineer and System Administrator seeking a challenging role to apply expertise in network infrastructure, cloud technologies, and IT systems administration. Proven experience in managing enterprise networks, Microsoft 365 environments, Azure services, and endpoint security while delivering reliable and secure IT solutions. Adept at troubleshooting complex technical issues, optimizing system performance, and collaborating across teams to enhance operational efficiency and business continuity.",
 } as const;
 
 export type Role = {
