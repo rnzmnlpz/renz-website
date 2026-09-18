@@ -128,16 +128,50 @@ export const stack: ToolGroup[] = [
   },
 ];
 
-export const certifications = [
-  { name: "Certified Cybersecurity Educator Professional", code: "CCEP", family: "Cybersecurity" },
-  { name: "Certified Red Team Operations Management", code: "CRTOM", family: "Offensive" },
+export type Certification = {
+  name: string;
+  code: string;
+  family: string;
+  /** Path under /public. Present only where the certificate itself is on file;
+      the rest render as plain text rather than a link that goes nowhere. */
+  file?: string;
+};
+
+export const certifications: Certification[] = [
+  {
+    name: "Certified Cybersecurity Educator Professional",
+    code: "CCEP",
+    family: "Cybersecurity",
+    file: "/certificates/ccep.pdf",
+  },
+  {
+    name: "Certified Red Team Operations Management",
+    code: "CRTOM",
+    family: "Offensive",
+    file: "/certificates/crtom.pdf",
+  },
   { name: "NSE 1 Cybersecurity and Cloud Fundamentals", code: "NSE 1", family: "Fortinet" },
   { name: "NSE 2 Introduction to Next Generation Firewall", code: "NSE 2", family: "Fortinet" },
   { name: "Cisco Network Defense", code: "NetDef", family: "Cisco" },
-  { name: "Cisco Endpoint Security", code: "EndSec", family: "Cisco" },
+  {
+    name: "Cisco Endpoint Security",
+    code: "EndSec",
+    family: "Cisco",
+    file: "/certificates/cisco-endpoint-security.pdf",
+  },
   { name: "Introduction to Cloud Infrastructure Technologies", code: "LFS151", family: "Linux Foundation" },
-  { name: "Cybersecurity Essentials", code: "LFC108", family: "Linux Foundation" },
-  { name: "Authentication and Authorization for Web-API", code: "LFEL1004", family: "Linux Foundation" },
+  {
+    name: "Cybersecurity Essentials",
+    code: "LFC108",
+    family: "Linux Foundation",
+    file: "/certificates/lfc108-cybersecurity-essentials.pdf",
+  },
+  {
+    name: "Authentication and Authorization for Web-API",
+    code: "LFEL1004",
+    family: "Linux Foundation",
+    file: "/certificates/lfel1004-web-api-auth.pdf",
+  },
 ];
 
 export const education = [

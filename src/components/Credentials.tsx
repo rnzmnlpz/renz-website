@@ -12,11 +12,34 @@ export default function Credentials() {
             <h3 className="font-mono text-sm text-aqua">Certifications</h3>
             <ul className="mt-7 space-y-4">
               {certifications.map((cert) => (
-                <li
-                  key={cert.code}
-                  className="flex items-baseline justify-between gap-6"
-                >
-                  <span className="text-[0.95rem] leading-snug text-signal">{cert.name}</span>
+                <li key={cert.code} className="flex items-baseline justify-between gap-6">
+                  {/* Only certificates actually on file become links. The rest
+                      stay plain text rather than inviting a click that leads
+                      nowhere. */}
+                  {cert.file ? (
+                    <a
+                      href={cert.file}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="press link-underline group/cert inline-flex items-baseline gap-1.5 text-[0.95rem] leading-snug text-signal hover:text-aqua"
+                    >
+                      {cert.name}
+                      <svg
+                        viewBox="0 0 12 12"
+                        className="h-2.5 w-2.5 shrink-0 translate-y-px opacity-50 transition-opacity group-hover/cert:opacity-100"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={1.6}
+                        aria-hidden
+                      >
+                        <path d="M4.5 1.5h6v6M10.5 1.5L4 8M8 10.5H1.5V4" strokeLinecap="round" />
+                      </svg>
+                      <span className="sr-only">— view certificate, opens a PDF in a new tab</span>
+                    </a>
+                  ) : (
+                    <span className="text-[0.95rem] leading-snug text-signal">{cert.name}</span>
+                  )}
+
                   <span translate="no" className="shrink-0 font-mono text-xs text-faint">
                     {cert.family}
                   </span>
