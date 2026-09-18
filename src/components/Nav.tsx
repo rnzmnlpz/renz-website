@@ -1,6 +1,8 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
+import portrait from "@/images/profile.webp";
 import { profile } from "@/lib/profile";
 
 const SECTIONS = [
@@ -70,8 +72,21 @@ export default function Nav() {
       }`}
     >
       <nav className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5 sm:px-8" aria-label="Primary">
-        <a href="#top" className="font-mono text-sm text-signal transition-colors hover:text-aqua">
-          {profile.initials}
+        <a
+          href="#top"
+          aria-label={`${profile.shortName} — back to top`}
+          className="press block rounded-full ring-1 ring-line hover:ring-aqua"
+        >
+          {/* Statically imported so Next derives the intrinsic size itself and
+              the avatar cannot shift the header as it loads. */}
+          <Image
+            src={portrait}
+            alt=""
+            width={32}
+            height={32}
+            priority
+            className="h-8 w-8 rounded-full object-cover"
+          />
         </a>
 
         <div className="hidden items-center gap-8 md:flex">
